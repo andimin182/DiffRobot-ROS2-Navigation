@@ -34,5 +34,5 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /home/andi/DockerDev/control/dev_ws
+      device: /home/andi/DockerDev/diff_robot/dev_ws
       o: bind
