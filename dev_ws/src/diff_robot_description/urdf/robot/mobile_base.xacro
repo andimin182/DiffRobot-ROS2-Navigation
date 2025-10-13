@@ -6,9 +6,26 @@
     <xacro:property name="base_height" value="0.2" />
     <xacro:property name="wheel_radius" value="0.1" />
     <xacro:property name="wheel_length" value="0.05" />
+    <xacro:arg name="enable_collision" default="false" />
 
+    <xacro:macro name="default_inertia" params="mass">
+        <inertial>
+            <mass value="${mass}"/>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
+        </inertial>
+    </xacro:macro>
+
+    <!-- base_footprint (projection of base_link on the ground) -->
     <link name="base_footprint" />
 
+    <joint name="base_joint" type="fixed">
+        <parent link="base_footprint" />
+        <child link="base_link" />
+        <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
+    </joint>
+
+    <!-- base_link and base_scan (required for Nav2) -->
     <link name="base_link">
         <visual>
             <geometry>
@@ -17,8 +34,19 @@
             <origin xyz="0 0 ${base_height / 2.0}" rpy="0 0 0" />
             <material name="blue" />
         </visual>
+
+    <xacro:if value="$(arg enable_collision)">
+        <collision>
+          <geometry>
+            <box size="${base_length} ${base_width} ${base_height}" />
+          </geometry>
+        </collision>
+      </xacro:if>
+
+      <xacro:default_inertia mass="1"/>
     </link>
 
+    <!-- 2 Differential wheels and one caster wheel to keep balance-->
     <xacro:macro name="wheel_link" params="prefix">
         <link name="${prefix}_wheel_link">
             <visual>
@@ -28,7 +56,18 @@
                 <origin xyz="0 0 0" rpy="${pi / 2.0} 0 0" />
                 <material name="grey" />
             </visual>
-        </link>
+        
+    <xacro:if value="$(arg enable_collision)">
+        <collision>
+          <geometry>
+            <cylinder radius="${wheel_radius}" length="${wheel_length}" />
+          </geometry>
+        </collision>
+      </xacro:if>
+
+      <xacro:default_inertia mass="1"/>
+    </link>
+
     </xacro:macro>
 
     <xacro:wheel_link prefix="right" />
@@ -42,13 +81,19 @@
             <origin xyz="0 0 0" rpy="0 0 0" />
             <material name="grey" />
         </visual>
+
+    <xacro:if value="$(arg enable_collision)">
+        <collision>
+          <geometry>
+            <sphere radius="${wheel_radius / 2.0}" />
+          </geometry>
+        </collision>
+      </xacro:if>
+
+      <xacro:default_inertia mass="1"/>
     </link>
 
-    <joint name="base_joint" type="fixed">
-        <parent link="base_footprint" />
-        <child link="base_link" />
-        <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
-    </joint>
+    
 
     <joint name="base_right_wheel_joint" type="continuous">
         <parent link="base_link" />

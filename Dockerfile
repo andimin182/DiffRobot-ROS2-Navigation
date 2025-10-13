@@ -39,7 +39,7 @@ RUN apt-get install -y \
 # image-transport
 RUN apt-get install -y ros-${ROS_DISTRO}-image-transport
  
-# Gazebo Harmonic for Jazzy distro
+# # Gazebo Harmonic for Jazzy distro
 RUN apt-get install -y ros-${ROS_DISTRO}-ros-gz* \
     ros-${ROS_DISTRO}-gz-ros2-control
 
@@ -77,6 +77,11 @@ RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash"
 
 # Add the source command to .bashrc
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /root/.bashrc
+RUN echo 'alias build="cd /root/ros_ws/ && colcon build && source install/setup.bash"' >> /root/.bashrc
+RUN echo "export TURTLEBOT3_MODEL=waffle" >> /root/.bashrc
+
+# Source the .bashrc
+RUN /bin/bash -c "source /root/.bashrc"
 
 # Define the ENV variables
 ENV PYTHONPATH=${PYTHONPATH}:/opt/ros/$ROS_DISTRO/lib/py
