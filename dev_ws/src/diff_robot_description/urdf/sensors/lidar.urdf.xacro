@@ -37,8 +37,8 @@
     enable_collision:=false">
 
     <xacro:property name="radius" value="${lidar_width/2}" />
-    <xacro:property name="ixx_iyy" value="${(mass/12) * (3 * radius * radius + lidar_height * lidar_height)}" />
-    <xacro:property name="izz" value="${(mass/2) * (radius * radius)}" />
+    <xacro:property name="ixx_iyy" value="1" />
+    <xacro:property name="izz" value="1" />
 
     <link name="${prefix}${frame_id}">
       <visual>
@@ -77,8 +77,9 @@
       <origin xyz="${xyz_offset}" rpy="${rpy_offset}"/>
     </joint>
 
-    <!-- Plugin Section for Gazebo-->
-    <gazebo>
+
+     <!-- Plugin Lidar Sensors Section for Gazebo-->
+     <gazebo>
       <plugin
        filename="gz-sim-sensors-system"
        name="gz::sim::systems::Sensors">

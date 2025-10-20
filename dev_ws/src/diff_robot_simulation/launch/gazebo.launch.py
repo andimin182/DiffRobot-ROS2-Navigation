@@ -10,7 +10,8 @@ from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     robot_simulation_dir = get_package_share_directory("diff_robot_description")
-    # Define some arg
+    world_default = "~/ros_ws/src/diff_robot_simulation/worlds/maze.sdf"
+    # Define launch arguments
     model_arg = DeclareLaunchArgument(
         name="model", 
         default_value = os.path.join(get_package_share_directory("diff_robot_description"), "urdf","robot", "my_robot.urdf.xacro"),
@@ -18,20 +19,38 @@ def generate_launch_description():
         )
     
     sim_arg = DeclareLaunchArgument(
-        name="use_sim",
+        name="use_sim_time",
         default_value="true",
-        description= "Use simulation time flag"
+        description= "Use Gazebo simulation time"
     )
 
     collision_arg = DeclareLaunchArgument(
         name="enable_collision",
         default_value="true",
-        description= "Enable collision tag"
+        description= "Enable collision tag in the URDF model"
     )
 
-    use_sim = LaunchConfiguration("use_sim")
+    enable_gz_control_arg = DeclareLaunchArgument(
+        name="enable_gz_control",
+        default_value="true",
+        description= "Enable ros2 control in URDF model for Gazebo simulation"
+    )
+
+    gz_world_arg = DeclareLaunchArgument(
+        name="gz_world",
+        default_value=world_default,
+        description= "The path to world to be used in simulation (Gazebo)"
+    )
+
+
+    # Retrieve the arguments from terminal
+    use_sim = LaunchConfiguration("use_sim_time")
+    robot_model = LaunchConfiguration("model")
     enable_collision = LaunchConfiguration("enable_collision")
+    enable_gz_control = LaunchConfiguration("enable_gz_control")
+    gz_world = LaunchConfiguration("gz_world")
     
+    # Set the Gz ENV VAR
     gazebo_resource_path = SetEnvironmentVariable(
         name="GZ_SIM_RESOURCE_PATH",
         value=[
@@ -42,8 +61,9 @@ def generate_launch_description():
     # Full plain URDF robot model (converted from xacro)
     robot_description = ParameterValue(Command([
         "xacro ", 
-        LaunchConfiguration("model"),
-        " enable_collision:=", enable_collision]),
+        robot_model,
+        " enable_collision:=", enable_collision,
+        " enable_gz_control:=", enable_gz_control]),
 
         value_type=str
     )
@@ -62,7 +82,7 @@ def generate_launch_description():
             os.path.join(get_package_share_directory("ros_gz_sim"), "launch"),
             "/gz_sim.launch.py"]
         ),
-        launch_arguments=[("gz_args", [" -r -v 4 -r ~/ros_ws/src/diff_robot_simulation/worlds/maze.sdf"])]
+        launch_arguments=[("gz_args", [" -r -v 4 -r ", gz_world])]
 
     )
 
@@ -76,18 +96,29 @@ def generate_launch_description():
     )
 
     # Launch the bridge between Ros2 & Gz to synchronize the clock and bridge all the necessary topics
+    # gz_ros2_bridge = Node(
+    #     package="ros_gz_bridge",
+    #     executable="parameter_bridge",
+    #     arguments=[
+    #         "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
+    #         "/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan"]
+    # )
+
+    ros_gz_bridge_config_file_path = os.path.join(get_package_share_directory("diff_robot_simulation"), "config", "gz_bridge_params.yaml")
     gz_ros2_bridge = Node(
-        package="ros_gz_bridge",
-        executable="parameter_bridge",
-        arguments=[
-            "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
-            "/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan"]
-    )
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        parameters=[{
+            'config_file': ros_gz_bridge_config_file_path,
+        }],
+        output='screen')
 
     return LaunchDescription([
         model_arg,
         sim_arg,
         collision_arg,
+        enable_gz_control_arg,
+        gz_world_arg,
         gazebo_resource_path,
         robot_state_publisher,
         gazebo,

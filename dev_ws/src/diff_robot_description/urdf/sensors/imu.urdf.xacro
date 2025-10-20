@@ -22,7 +22,8 @@
         update_rate:='15.0'
         topic_name:='imu/data'
         always_on:=true
-        visualize:=false">
+        visualize:=false
+        enable_collision:=false">
 
         <xacro:property name="ixx" value="${(mass/12.0) * (height*height + width*width)}" />
         <xacro:property name="iyy" value="${(mass/12.0) * (length*length + height*height)}" />
@@ -50,6 +51,15 @@
                     iyz="0.0"
                     izz="${izz}" />
             </inertial>
+
+            <xacro:if value="${enable_collision}">
+                <collision>
+                <geometry>
+                    <box size="${length} ${width} ${height}"/>
+                </geometry>
+                <origin xyz="${inertial_xyz_offset}" rpy="${inertial_rpy_offset}"/>s
+                </collision>
+            </xacro:if>
         </link>
 
         <joint name="${prefix}${frame_id}_joint" type="fixed">
@@ -57,6 +67,13 @@
             <child link="${prefix}${frame_id}_link" />
             <origin xyz="${xyz_offset}" rpy="${rpy_offset}"/>
         </joint>
+
+        <!-- IMU Sensor -->
+        <gazebo>
+            <plugin filename="gz-sim-imu-system"
+                    name="gz::sim::systems::Imu">
+            </plugin>
+        </gazebo>
 
         <gazebo reference="${prefix}${frame_id}_link">
             <material>
@@ -70,6 +87,83 @@
                 <always_on>${always_on}</always_on>
                 <visualize>${visualize}</visualize>
                 <gz_frame_id>${prefix}${frame_id}_link</gz_frame_id>
+                <imu>
+                    <angular_velocity>true</angular_velocity>
+                    <linear_acceleration>true</linear_acceleration>
+                  </imu>
+                <!--<imu>
+                    <enable_orientation>0</enable_orientation>
+                    <angular_velocity>
+                      <x>
+                        <noise type="gaussian">
+                          <mean>0</mean>
+                          <stddev>0.009</stddev>
+                          <bias_mean>0.00075</bias_mean>
+                          <bias_stddev>0.005</bias_stddev>
+                          <dynamic_bias_stddev>0.00002</dynamic_bias_stddev>
+                          <dynamic_bias_correlation_time>400.0</dynamic_bias_correlation_time>
+                          <precision>0.00025</precision>
+                        </noise>
+                      </x>
+                      <y>
+                        <noise type="gaussian">
+                          <mean>0</mean>
+                          <stddev>0.009</stddev>
+                          <bias_mean>0.00075</bias_mean>
+                          <bias_stddev>0.005</bias_stddev>
+                          <dynamic_bias_stddev>0.00002</dynamic_bias_stddev>
+                          <dynamic_bias_correlation_time>400.0</dynamic_bias_correlation_time>
+                          <precision>0.00025</precision>
+                        </noise>
+                      </y>
+                      <z>
+                        <noise type="gaussian">
+                          <mean>0</mean>
+                          <stddev>0.009</stddev>
+                          <bias_mean>0.00075</bias_mean>
+                          <bias_stddev>0.005</bias_stddev>
+                          <dynamic_bias_stddev>0.00002</dynamic_bias_stddev>
+                          <dynamic_bias_correlation_time>400.0</dynamic_bias_correlation_time>
+                          <precision>0.00025</precision>
+                        </noise>
+                      </z>
+                    </angular_velocity>
+                    <linear_acceleration>
+                      <x>
+                        <noise type="gaussian">
+                          <mean>0</mean>
+                          <stddev>0.021</stddev>
+                          <bias_mean>0.05</bias_mean>
+                          <bias_stddev>0.0075</bias_stddev>
+                          <dynamic_bias_stddev>0.000375</dynamic_bias_stddev>
+                          <dynamic_bias_correlation_time>175.0</dynamic_bias_correlation_time>
+                          <precision>0.005</precision>
+                        </noise>
+                      </x>
+                      <y>
+                        <noise type="gaussian">
+                          <mean>0</mean>
+                          <stddev>0.021</stddev>
+                          <bias_mean>0.05</bias_mean>
+                          <bias_stddev>0.0075</bias_stddev>
+                          <dynamic_bias_stddev>0.000375</dynamic_bias_stddev>
+                          <dynamic_bias_correlation_time>175.0</dynamic_bias_correlation_time>
+                          <precision>0.005</precision>
+                        </noise>
+                      </y>
+                      <z>
+                        <noise type="gaussian">
+                          <mean>0</mean>
+                          <stddev>0.021</stddev>
+                          <bias_mean>0.05</bias_mean>
+                          <bias_stddev>0.0075</bias_stddev>
+                          <dynamic_bias_stddev>0.000375</dynamic_bias_stddev>
+                          <dynamic_bias_correlation_time>175.0</dynamic_bias_correlation_time>
+                          <precision>0.005</precision>
+                        </noise>
+                      </z>
+                    </linear_acceleration>
+                  </imu> -->
             </sensor>
         </gazebo>
     </xacro:macro>

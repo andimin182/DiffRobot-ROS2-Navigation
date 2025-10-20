@@ -3,18 +3,44 @@
     <xacro:arg name="prefix" default=""/>
     <xacro:property name="M_PI" value="3.1415926535897931" />
     <xacro:arg name="enable_collision" default="false"/>
+    <xacro:arg name="enable_gz_control" default="false"/>
 
     <xacro:include filename="$(find diff_robot_description)/urdf/sensors/imu.urdf.xacro" />
     <xacro:include filename="$(find diff_robot_description)/urdf/sensors/lidar.urdf.xacro" />
     <xacro:include filename="$(find diff_robot_description)/urdf/sensors/rgbd_camera.urdf.xacro" />
 
+    <!-- Wheel properties-->
+    <gazebo reference="left_wheel_link">
+      <mu1>1</mu1>
+      <mu2>1</mu2>
+    </gazebo>
 
-<!--
+    <gazebo reference="right_wheel_link">
+      <mu1>1</mu1>
+      <mu2>1</mu2>
+    </gazebo>
+
+    <gazebo reference="caster_wheel_link">
+      <mu1>0.01</mu1>
+      <mu2>0.01</mu2>
+    </gazebo>
+
+    <!-- Plugin Ros2 control Section for Gazebo-->
+    <xacro:if value="$(arg enable_gz_control)"> 
+      <gazebo>
+        <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+            <parameters>$(find diff_robot_controllers)/config/robot_controllers.yaml</parameters>
+        </plugin>
+      </gazebo>
+    </xacro:if>
+
+    <!-- Sensors section -->
     <xacro:rgbd_camera
       prefix="$(arg prefix)"
       camera_name="cam_1"
-      xyz_offset="0.105 0 0.05"
-      rpy_offset="0 -0.50 0"/>
+      xyz_offset="0.3 0 0.1"
+      rpy_offset="0 0 0"
+      enable_collision="$(arg enable_collision)"/>
 
     <xacro:imu_sensor
       prefix="$(arg prefix)"
@@ -23,16 +49,17 @@
       xyz_offset="0 0 0.006"
       rpy_offset="0 0 0"
       update_rate="15.0"
-      topic_name="imu/data"/> -->
+      topic_name="imu/data"
+      enable_collision="$(arg enable_collision)"/> 
 
-      <xacro:lidar_sensor
-        prefix="$(arg prefix)"
-        parent="base_link"
-        frame_id="base_scan"
-        xyz_offset="0 0 0.23"
-        rpy_offset="0 0 0"
-        enable_collision="$(arg enable_collision)"
-        topic_name="scan"/>
+    <xacro:lidar_sensor
+      prefix="$(arg prefix)"
+      parent="base_link"
+      frame_id="base_scan"
+      xyz_offset="0 0 0.23"
+      rpy_offset="0 0 0"
+      enable_collision="$(arg enable_collision)"
+      topic_name="scan"/>
 
 
 </robot>
