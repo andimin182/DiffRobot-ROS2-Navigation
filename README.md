@@ -8,14 +8,12 @@ This repository demonstrates a complete robotics pipeline — from URDF descript
 
 ## 🧭 Table of Contents
 
-1. [Project Overview](#1-project-overview)  
-2. [Docker Setup](#2-docker-setup)  
-3. [Running the Simulation](#3-running-the-simulation)  
-4. [Localization, Mapping & Navigation](#4-localization-mapping--navigation)  
-5. [Repository Structure](#repository-structure)  
-6. [Requirements](#requirements)  
-7. [Common Issues](#common-issues)  
-8. [Author & License](#author--license)
+1. [Project Overview](#1️⃣-project-overview)  
+2. [Requirements](#2️⃣-requirements)
+3. [Docker Setup](#3️⃣-docker-setup)  
+4. [Running the Simulation](#4️⃣-running-the-simulation)  
+5. [Localization, Mapping & Navigation](#5️⃣-localization-mapping--navigation)  
+6. [Common Issues](#6️⃣-common-issues)
 
 ---
 
@@ -33,7 +31,7 @@ The **DiffRobot-ROS2-Navigation** project is a modular ROS 2 workspace that incl
 
 Everything runs inside a Docker container for an easy, dependency-free setup.
 
-### Requirements
+## 2️⃣ Requirements
 
 - Docker
 
@@ -46,7 +44,7 @@ Without docker container, you need:
 
 ---
 
-## 2️⃣ Docker Setup
+## 3️⃣ Docker Setup
 
 ### 🐳 docker-compose.yml
 
@@ -113,7 +111,9 @@ source install/setup.bash
 
 Now your environment is ready to launch the simulation, localization, and navigation stacks.
 
-### 3️⃣ Running the Simulation
+---
+
+## 4️⃣ Running the Simulation
 3.1 Launch Gazebo Simulation
 
 To visualize the differential drive robot model in a simulated world (default custom maze world from diff_robot_simulation/worlds/maze.sdf):
@@ -166,7 +166,9 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard  --ros-args -r /cmd_vel:=/d
 
 Use your keyboard to move the robot inside Gazebo.
 
-### 4️⃣ Localization, Mapping & Navigation
+---
+
+## 5️⃣ Localization, Mapping & Navigation
 
 This section explains the main stages of making your robot autonomous:
 Localization → Mapping → Navigation.
@@ -222,3 +224,14 @@ Example: Reset the NAV2 components.
 Example: Robot planning and navigating to a goal using Nav2.
 
 ![Robot planning and navigating to a goal using Nav2.](images/nav-to-goal.png)
+
+---
+
+## 6️⃣ Common Issues
+
+| Issue | Description | Fix |
+|-------|--------------|-----|
+| **GUI not showing** | X11 permission error | Run `xhost +local:root` before `docker-compose up` |
+| **controller_manager not running** | Missing `ros2_control` startup | Start controller manually or check launch file |
+| **Slow simulation** | CPU overload | Use smaller Gazebo world or enable GPU rendering |
+| **No navigation** | Localization not running | Ensure EKF and map topics are publishing correctly |
